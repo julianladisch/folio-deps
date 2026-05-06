@@ -15,11 +15,11 @@ jobs:
           java-version: 21
           distribution: 'temurin'
       - run: |
-          DESCRIPTOR=$( wget -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
+          DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
           PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required.[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
           MODULES=$( for PLATFORM in $PLATFORMS
                      do
-                       wget -O - "$PLATFORM" | jq -r '.modules.[] | .name + " " + .version'
+                       wget -nv -O - "$PLATFORM" | jq -r '.modules.[] | .name + " " + .version'
                      done | sort
                    )
           printf %s "$MODULES"
