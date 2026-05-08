@@ -49,9 +49,6 @@ jobs:
                 continue
               fi
               case "$MODULE" in
-                edge-connexion)
-                  break
-                  ;;
                 mod-graphql)  # nodejs
                   continue
                   ;;
@@ -61,7 +58,8 @@ jobs:
                 mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle
                   continue
                   ;;
-                *)
+                # *)
+                edge-connexion)
                   gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
                   # the first run is polluted with download messages
                   ( cd "$MODULE"; mvn dependency:tree > /dev/null )
@@ -69,7 +67,6 @@ jobs:
                   ;;
               esac
             done
-            echo git add $RELEASE
             git add $RELEASE
             git status
           done
@@ -77,7 +74,7 @@ jobs:
           echo final git status
           git status
           set +e
-          git diff --exit-code --name-status
+          git diff --cached --exit-code --name-status
           echo "changed=$?" | tee -a $GITHUB_OUTPUT
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: steps.collect.outputs.changed != 0
