@@ -40,17 +40,24 @@ jobs:
             printf %s "$MODULES" | while read MODULE VERSION
             do
               printf '%s\n' "$MODULE $VERSION"
-              if [ "$MODULE" == "mod-graphql" ]; then
-                continue  # not maven but nodejs
-              fi
               if [ -e "x/$MODULE-$VERSION" ]; then
                 cp "x/$MODULE-$VERSION" $RELEASE/
                 continue
               fi
-              gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
-              # first run polluted with download messages
-              ( cd "$MODULE"; mvn dependency:tree > /dev/null )
-              ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../$RELEASE/$MODULE-$VERSION" )
+              case "$MODULE" in
+                mod-graphql)  # nodejs
+                  continue
+                  ;;
+                mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle
+                  continue
+                  ;;
+                *)
+                  gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
+                  # the first run is polluted with download messages
+                  ( cd "$MODULE"; mvn dependency:tree > /dev/null )
+                  ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../$RELEASE/$MODULE-$VERSION" )
+                  ;;
+              esac
             done
             git add $RELEASE
           done
