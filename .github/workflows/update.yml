@@ -1,4 +1,4 @@
-name: collect
+name: update
 on:
   push:
     branches: [ "main" ]
@@ -10,7 +10,7 @@ jobs:
   collect:
     outputs:
       changed: ${{ steps.collect.outputs.changed }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
         with:
@@ -23,6 +23,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          mv R1-2025 x
+          git rm -r R1-2025
           git config --global advice.detachedHead false
           DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
           PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
@@ -31,21 +33,23 @@ jobs:
                        wget -nv -O - "$PLATFORM" | jq -r '.modules[] | .name + " " + .version'
                      done | sort
                    )
-          mkdir -p R1-2026
           printf %s "$MODULES" | while read MODULE VERSION
           do
-            printf %s "$MODULE $VERSION"
+            printf '%s\n' "$MODULE $VERSION"
             if [ "$MODULE" == "mod-graphql" ]; then
               continue  # not maven but nodejs
             fi
+            if [ -e "x/$MODULE-$VERSION" ]; then
+              cp "x/$MODULE-$VERSION" R1-2026/
+              continue
+            fi
+            changed=1
             gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
+            # first run polluted with download messages
             ( cd "$MODULE"; mvn dependency:tree > /dev/null )
             ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../R1-2026/$MODULE-$VERSION" )
           done
-          git add R1-2026
-          set +e
-          git diff --exit-code --name-status
-          printf "changed=%s" "$?" >> $GITHUB_OUTPUT
+          echo "changed=$changed" >> $GITHUB_OUTPUT
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: steps.collect.outputs.changed
         with:
