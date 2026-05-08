@@ -8,9 +8,20 @@ on:
 permissions: {}
 jobs:
   collect:
+    outputs:
+      changed: ${{ steps.collect.outputs.changed }}
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - id: collect
+        run: |
+          find .
           DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
           PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
           MODULES=$( for PLATFORM in $PLATFORMS
@@ -18,8 +29,38 @@ jobs:
                        wget -nv -O - "$PLATFORM" | jq -r '.modules[] | .name + " " + .version'
                      done | sort
                    )
-          printf %s "$MODULES"
-      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
+          mkdir -p R1-2026
+          printf %s "$MODULES" | while read MODULE VERSION
+          do
+            printf %s "$MODULE $VERSION"
+            gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
+            ( cd "$MODULE"; mvn dependency:tree > "../R1-2026/$MODULE-$VERSION" )
+            break
+          done
+          git add R1-2026
+          set +e
+          git diff --exit-code --name-status
+          printf "changed=%s" "$?" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: steps.collect.outputs.changed
         with:
-          java-version: 21
-          distribution: 'temurin'
+          retention-days: 1
+          path: |
+            R1-2026/
+  upload:
+    needs: collect
+    if: needs.collect.outputs.changed
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      - run: rm -rf R1-2026/
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+      - run: find
+      - run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add R1-2026
+          git commit -m "Automated update"
+          git push
