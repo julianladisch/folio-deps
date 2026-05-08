@@ -27,9 +27,13 @@ jobs:
           git config --global advice.detachedHead false
           for RELEASE in R1-2026
           do
+            echo "Setup $RELEASE"
+            find .
             mv $RELEASE x || true
             git rm -q -r $RELEASE || true
             mkdir $RELEASE
+            echo "Setup $RELEASE done:"
+            find .
             DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/$RELEASE/platform-descriptor.json )
             PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[], .applications.optional[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
             MODULES=$( for PLATFORM in $PLATFORMS
@@ -57,8 +61,11 @@ jobs:
                 *)
                   gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
                   # the first run is polluted with download messages
+                  pwd
                   ( cd "$MODULE"; mvn dependency:tree > /dev/null )
+                  pwd
                   ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../$RELEASE/$MODULE-$VERSION" )
+                  pwd
                   ;;
               esac
             done
