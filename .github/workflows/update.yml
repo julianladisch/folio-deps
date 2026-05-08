@@ -49,6 +49,9 @@ jobs:
                 continue
               fi
               case "$MODULE" in
+                edge-connexion)
+                  break
+                  ;;
                 mod-graphql)  # nodejs
                   continue
                   ;;
@@ -61,17 +64,17 @@ jobs:
                 *)
                   gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
                   # the first run is polluted with download messages
-                  pwd
                   ( cd "$MODULE"; mvn dependency:tree > /dev/null )
-                  pwd
                   ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../$RELEASE/$MODULE-$VERSION" )
-                  pwd
                   ;;
               esac
             done
+            echo git add $RELEASE
             git add $RELEASE
+            git status
           done
           find .
+          echo final git status
           git status
           set +e
           git diff --exit-code --name-status
