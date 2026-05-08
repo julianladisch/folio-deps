@@ -26,7 +26,7 @@ jobs:
         run: |
           git config --global advice.detachedHead false
           mv R1-2026 x
-          git rm -r R1-2026
+          git rm -q -r R1-2026
           mkdir R1-2026
           DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
           PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
@@ -50,8 +50,11 @@ jobs:
             # first run polluted with download messages
             ( cd "$MODULE"; mvn dependency:tree > /dev/null )
             ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../R1-2026/$MODULE-$VERSION" )
-          done; echo "changed=$changed" >> $GITHUB_OUTPUT
-          
+          done
+          git add R1-2026
+          set +e
+          git diff --exit-code --name-status
+          echo "changed=$?" >> $GITHUB_OUTPUT
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: steps.collect.outputs.changed
         with:
