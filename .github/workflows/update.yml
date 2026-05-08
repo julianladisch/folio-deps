@@ -48,6 +48,9 @@ jobs:
                 mod-graphql)  # nodejs
                   continue
                   ;;
+                mod-reporting)  # go
+                  continue
+                  ;;
                 mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle
                   continue
                   ;;
