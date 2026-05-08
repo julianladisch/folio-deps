@@ -37,8 +37,7 @@ jobs:
           do
             printf %s "$MODULE $VERSION"
             gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
-            ( cd "$MODULE"; mvn dependency:tree > "../R1-2026/$MODULE-$VERSION" )
-            break
+            ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../R1-2026/$MODULE-$VERSION" )
           done
           git add R1-2026
           set +e
