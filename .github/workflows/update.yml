@@ -25,10 +25,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           git config --global advice.detachedHead false
-          for RELEASE in R1-2025 R2-2025
+          for RELEASE in R1-2026
           do
-            mv $RELEASE x
-            git rm -q -r $RELEASE
+            mv $RELEASE x || true
+            git rm -q -r $RELEASE || true
             mkdir $RELEASE
             DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/$RELEASE/platform-descriptor.json )
             PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
