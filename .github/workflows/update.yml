@@ -23,8 +23,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mv R1-2025 x
-          git rm -r R1-2025
+          mv R1-2026 x
+          git rm -r R1-2026
           git config --global advice.detachedHead false
           DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
           PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
