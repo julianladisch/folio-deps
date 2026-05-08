@@ -57,9 +57,9 @@ jobs:
           done
           set +e
           git diff --exit-code --name-status
-          echo "changed=$?" >> $GITHUB_OUTPUT
+          echo "changed=$?" | tee -a $GITHUB_OUTPUT
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        if: steps.collect.outputs.changed
+        if: steps.collect.outputs.changed != 0
         with:
           retention-days: 1
           path: |
@@ -67,7 +67,7 @@ jobs:
             R1-2026/
   upload:
     needs: collect
-    if: needs.collect.outputs.changed
+    if: needs.collect.outputs.changed != 0
     runs-on: ubuntu-slim
     permissions:
       contents: write
