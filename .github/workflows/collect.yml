@@ -10,16 +10,16 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
+          PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
+          MODULES=$( for PLATFORM in $PLATFORMS
+                     do
+                       wget -nv -O - "$PLATFORM" | jq -r '.modules[] | .name + " " + .version'
+                     done | sort
+                   )
+          printf %s "$MODULES"
       - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
         with:
           java-version: 21
           distribution: 'temurin'
-      - run: |
-          DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
-          PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required.[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
-          MODULES=$( for PLATFORM in $PLATFORMS
-                     do
-                       wget -nv -O - "$PLATFORM" | jq -r '.modules.[] | .name + " " + .version'
-                     done | sort
-                   )
-          printf %s "$MODULES"
