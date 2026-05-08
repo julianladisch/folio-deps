@@ -45,11 +45,14 @@ jobs:
               continue
             fi
             changed=1
+            echo "a changed=$changed"
             gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
             # first run polluted with download messages
             ( cd "$MODULE"; mvn dependency:tree > /dev/null )
             ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../R1-2026/$MODULE-$VERSION" )
+            echo "b changed=$changed"
           done
+          echo "changed=$changed"
           echo "changed=$changed" >> $GITHUB_OUTPUT
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: steps.collect.outputs.changed
