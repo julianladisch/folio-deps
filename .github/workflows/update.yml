@@ -64,6 +64,8 @@ jobs:
             done
             git add $RELEASE
           done
+          find .
+          git status
           set +e
           git diff --exit-code --name-status
           echo "changed=$?" | tee -a $GITHUB_OUTPUT
