@@ -35,6 +35,9 @@ jobs:
           printf %s "$MODULES" | while read MODULE VERSION
           do
             printf %s "$MODULE $VERSION"
+            if [ "$MODULE" == "mod-graphql" ] then
+              continue  # not maven but nodejs
+            fi;
             gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
             ( cd "$MODULE"; mvn dependency:tree > /dev/null )
             ( cd "$MODULE"; mvn dependency:tree | sed -n '/^\[INFO\] --- dependency:/,/^\[INFO\] -/ { s/^\[INFO\] //; /^-/d; p }' > "../R1-2026/$MODULE-$VERSION" )
