@@ -31,7 +31,7 @@ jobs:
             git rm -q -r $RELEASE || true
             mkdir $RELEASE
             DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/$RELEASE/platform-descriptor.json )
-            PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
+            PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[], .applications.optional[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
             MODULES=$( for PLATFORM in $PLATFORMS
                        do
                          wget -nv -O - "$PLATFORM" | jq -r '.modules[] | .name + " " + .version'
@@ -47,7 +47,6 @@ jobs:
                 cp "x/$MODULE-$VERSION" $RELEASE/
                 continue
               fi
-              changed=1
               gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
               # first run polluted with download messages
               ( cd "$MODULE"; mvn dependency:tree > /dev/null )
