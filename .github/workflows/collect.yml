@@ -20,8 +20,10 @@ jobs:
           java-version: 21
           distribution: 'temurin'
       - id: collect
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          find .
+          ls -al
           DESCRIPTOR=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/R1-2026/platform-descriptor.json )
           PLATFORMS=$( printf %s "$DESCRIPTOR" | jq -r '.applications.required[] | "https://raw.githubusercontent.com/folio-org/" + .name + "/refs/tags/v" + .version + "/application.lock.json"' )
           MODULES=$( for PLATFORM in $PLATFORMS
