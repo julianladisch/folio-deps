@@ -51,10 +51,14 @@ jobs:
                   continue
                   ;;
                 mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle + Java 17
-                  gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
-                  sed -i 's/org.gradle.parallel=true/org.gradle.parallel=false/' "$MODULE/service/gradle.properties"
-                  ( cd "$MODULE/service"; export JAVA_HOME="$JAVA_HOME_17_X64"; ./gradlew dependencies | tee "../../$RELEASE/$MODULE-$VERSION" ; echo done1 )
-                  echo done2
+                  echo "Please add $MODULE-$VERSION manually (grandle hangs in CI)"
+                  exit 1
+                  # gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
+                  ### this hangs, known issue:
+                  ### https://github.com/cdsap/Talaiot/issues/389
+                  ### https://github.com/anomalyco/opencode/issues/25038
+                  ### https://github.com/gradle/gradle/issues/5836
+                  # ( cd "$MODULE/service"; export JAVA_HOME="$JAVA_HOME_17_X64"; ./gradlew dependencies | tee "../../$RELEASE/$MODULE-$VERSION" )
                   continue
                   ;;
                 *)
