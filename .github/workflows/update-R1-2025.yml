@@ -29,7 +29,7 @@ jobs:
             APPLICATIONS=$( wget -nv -O - https://raw.githubusercontent.com/folio-org/platform-lsp/refs/heads/$RELEASE/install-applications.json | jq -r '.[].id' )
             MODULES=$(for APPLICATION in $APPLICATIONS
                       do
-                        read NAME VERSION < <( sprintf %s "$APPLICATION" | sed -E 's/-([0-9])/ \1/' )
+                        read NAME VERSION < <( printf %s "$APPLICATION" | sed -E 's/-([0-9])/ \1/' )
                         wget -nv -O - "https://raw.githubusercontent.com/folio-org/$NAME/refs/tags/v$VERSION/application-descriptor.json" | jq -r '.modules[] | .name + " " + .version'
                       done | sort
                      )
@@ -37,7 +37,6 @@ jobs:
             do
               printf '%s\n' "$MODULE $VERSION"
               if [ -e "x/$MODULE-$VERSION" ]; then
-                echo "cp x/$MODULE-$VERSION $RELEASE/"
                 cp "x/$MODULE-$VERSION" $RELEASE/
                 continue
               fi
