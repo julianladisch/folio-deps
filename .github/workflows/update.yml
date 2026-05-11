@@ -53,7 +53,7 @@ jobs:
                 mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle + Java 17
                   gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
                   set | grep JAVA
-                  ( cd "$MODULE/service"; export JAVA_HOME="$JAVA_HOME_17_X64"; ./gradlew dependencies > "../../$RELEASE/$MODULE-$VERSION" )
+                  ( cd "$MODULE/service"; export JAVA_HOME="$JAVA_HOME_17_X64"; ./gradlew dependencies | tee "../../$RELEASE/$MODULE-$VERSION" )
                   continue
                   ;;
                 *)
