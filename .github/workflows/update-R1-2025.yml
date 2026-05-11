@@ -37,6 +37,7 @@ jobs:
             do
               printf '%s\n' "$MODULE $VERSION"
               if [ -e "x/$MODULE-$VERSION" ]; then
+                echo "cp x/$MODULE-$VERSION $RELEASE/"
                 cp "x/$MODULE-$VERSION" $RELEASE/
                 continue
               fi
