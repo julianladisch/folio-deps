@@ -52,7 +52,7 @@ jobs:
                   ;;
                 mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle + Java 17
                   gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
-                  ( cd "$MODULE/service"; export JAVA_HOME="$JAVA_HOME_17_X64"; ./gradlew --no-daemon --no-parallel dependencies | tee "../../$RELEASE/$MODULE-$VERSION" ; echo done1 )
+                  ( cd "$MODULE/service"; export JAVA_HOME="$JAVA_HOME_17_X64"; ./gradlew dependencies --no-daemon --no-parallel | tee "../../$RELEASE/$MODULE-$VERSION" ; echo done1 )
                   echo done2
                   continue
                   ;;
