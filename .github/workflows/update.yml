@@ -48,6 +48,7 @@ jobs:
                   continue
                   ;;
                 mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle
+                  gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
                   ( cd "$MODULE/service"; ./gradlew dependencies > "../../$RELEASE/$MODULE-$VERSION" )
                   continue
                   ;;
