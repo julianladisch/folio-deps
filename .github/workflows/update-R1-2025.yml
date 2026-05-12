@@ -47,8 +47,9 @@ jobs:
                 mod-reporting)  # go
                   continue
                   ;;
-                mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle
-                  continue
+                mod-agreements|mod-licenses|mod-oa|mod-remote-sync|mod-serials-management|mod-service-interaction)  # gradle + java 17
+                  echo "Please manually add $MODULE-$VERSION (grandle hangs in CI)"
+                  exit 1
                   ;;
                 *)
                   gh repo clone "folio-org/$MODULE" -- --branch "v$VERSION" --depth=1
